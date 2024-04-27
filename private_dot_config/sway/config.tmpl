@@ -10,11 +10,11 @@ input "6134:2309:Unicomp__Endura_Pro_Keyboard__Mouse" {
   scroll_button button3
 }
 
-{{ .data.sway.monitors }}
+{{ .sway.monitors }}
 
-{{ .data.sway.wallpaper }}
+{{ .sway.wallpaper }}
 
-{{ .data.sway.swayidle }}
+{{ .sway.swayidle }}
 
 for_window [class="Google-chrome"] inhibit_idle fullscreen
 
@@ -231,6 +231,4 @@ include /etc/sway/config.d/*
 
 include swayfx.config
 
-{{ .data.sway.local_settings }}
-
-{{ .data.dont_exist }}
+{{ .sway.local_settings }}
