@@ -1,0 +1,247 @@
+# Options ######################################################################
+
+setopt append_history        # Append to the history instead of replacing it
+setopt extended_glob         # Better globing
+setopt nomatch               # If a pattern has not matchs, print an error
+setopt interactive_comments  # Allow comments in interactive shells
+setopt magic_equal_subst     # Use filename expansion in some special cases
+setopt list_types            # When completing, show file types
+setopt numeric_glob_sort     # Sort numerically instead of lexicographically
+setopt hist_ignore_all_dups  # Ignore duplicates in history
+setopt complete_in_word      # Do completion from both ends
+
+unsetopt nomatch             # Leave no matches unchanged insteaf of error
+unsetopt auto_param_keys     # Don't delete some extra chars after completion
+unsetopt auto_remove_slash   # Don't remove slash in some completions
+unsetopt flow_control        # Disable Ctrl-S
+
+WORDCHARS=${WORDCHARS//\/}   # Remove / for word selection
+HISTSIZE=1000                # History size
+SAVEHIST=1000                # How much history to save
+HISTFILE=$HOME/.zsh_history  # ...and where to save them
+
+# Vi-mode ######################################################################
+
+bindkey -e                   # Use emacs mode by default
+bindkey "^[" vi-cmd-mode     # Change to vi mode with Esc
+function color-cursor() {    # Change the cursor in vi mode
+    if [ $KEYMAP = "vicmd" ]; then
+        echo -n "\e]12;#ffffff\a";  # White in vi mode
+    else
+        echo -n "\e]12;#ffa500\a";  # Orange by default
+    fi
+}
+zle -N zle-keymap-select color-cursor
+export KEYTIMEOUT=1  # React to Esc key immediately
+                     # Note: this may have side effects, but I haven't found any
+
+# Exports ######################################################################
+
+export PATH=$HOME/bin:$HOME/.local/bin:$PATH
+export EDITOR=nvim
+export LESS=-i
+export HOSTNAME=`hostname`
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+export _JAVA_OPTIONS="-Dawt.useSystemAAFontSettings=on -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"
+
+# Keybindings ##################################################################
+
+bindkey "^[Oa" beginning-of-line  # Ctrl-A
+bindkey "^[Ob" end-of-line        # Ctrl-E
+# Sometimes I press shift-Tab by mistake and it changes to vi mode.
+# This deactivates it.
+bindkey "^[[Z" expand-or-complete
+bindkey -M vicmd v edit-command-line  # Edit the command line with v in vi mode
+
+# In order to have the esc-key to react inmediately
+# This can have side-effects, as it is not esc-key specific, but so far
+# I haven't found any.
+
+fpath=(~/.zshcompletions $fpath)
+# The following lines were added by compinstall
+
+zstyle ':completion:*' completer _complete _match _prefix _files
+zstyle ':completion:*' insert-unambiguous false
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'
+zstyle ':completion:*' max-errors 1
+zstyle ':completion:*' menu select=1
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+
+autoload -Uz compinit
+compinit
+# End of lines added by compinstall
+
+# Completion for kitty
+kitty + complete setup zsh | source /dev/stdin
+alias icat="kitty +kitten icat"
+alias kdiff="kitty +kitten diff"
+
+autoload -U zmv
+autoload edit-command-line
+zle -N edit-command-line
+
+# Aliases
+alias ls="ls --color=auto -F"
+alias ll="ls -l"
+alias sl=ls
+alias mdkir=mkdir
+alias topc="top -b -n 1 | head -15"
+alias cal="ncal -bM"
+
+VIM=nvim
+alias vi=$VIM
+alias vim=$VIM
+alias view="$VIM -R"
+alias vimdiff="$VIM -d"
+function vim-parallel() {
+    $VIM "+:autocmd BufRead * set scrollbind | set cursorbind" "+:e $1" "+:rightb vsp $2"
+}
+
+alias bat=batcat
+
+function kspwd() {
+    print -rDn $PWD/$1 | ks
+}
+
+# Prompt
+promptBeginColor='{{ .zshrc.promptColor }}'
+promptEndColor='%{\e[0m%}'
+promptMachineIcon='{{ .zshrc.machineIcon }}'
+promptMachine="%m"
+precmd () {
+    print -Pn "\e]133;A\e\\"  # Prompt marker (e.g. for foot)
+    print -Pn "\e]0;$promptMachine: %~\a";  # Set the title
+
+    {{ .zshrc.customPrompts }}
+
+    promptJobs=' [%j]'
+
+    if [[ -n $VIRTUAL_ENV ]]; then
+      promptVenv="\e[0;34m `basename $VIRTUAL_ENV`"
+    else
+      promptVenv=''
+    fi
+
+    promptPrompt='%(!.#.$)'
+
+    PROMPT="$(print '\n'$promptBeginColor'%B'$promptMachineIcon$promptMachine'%b'$promptBeginColor{{ .zshrc.firstPromptLine }}'\n'$promptBeginColor $promptPath'\n'$promptPrompt $promptEndColor)"
+
+    # Ensure we have an orange cursor
+    #echo -n "\e]12;orange\a";
+    echo -n "\e]12;#ffa500\a";
+    print -n '\033[5 q'
+}
+preexec () {
+        #print -Pn "\e]0;%m: $2\a"
+    myLocalHistory $1
+}
+
+# Disable C-s to stop terminal output
+stty -ixon -ixoff
+
+function hdgrep()
+{
+    tr -d '\0' < .history | grep $* 2>/dev/null
+    LAST_HGREP_SEARCH=$*
+}
+
+function hnrep()
+{
+    tr -d '\0' < .history | grep "$*" 2>/dev/null | cut -f 2- -d ' ' | nl
+    LAST_HGREP_SEARCH=$*
+}
+
+function hgrep()
+{
+    tr -d '\0' < .history | grep "$*" 2>/dev/null | cut -f 2- -d ' '
+    LAST_HGREP_SEARCH=$*
+}
+
+function localHistory()
+{
+  tail .history 2>/dev/null
+}
+
+function hks()
+{
+  local commandNr
+  local hgrepOutput
+  # Fuzzy detection if the last argument is a position
+  if [[ $argv[-1] =~ '^[0-9]*$' ]]; then
+      commandNr=$argv[-1]
+      argv[-1]=()
+  fi
+  if [[ ${#argv[@]} == 0 ]]; then
+      searchTerms=$LAST_HGREP_SEARCH
+  else
+      searchTerms=$*
+      LAST_HGREP_SEARCH=$searchTerms
+  fi
+  hgrepOutput=("${(f)$(tr -d '\0' < .history | grep "$searchTerms" 2>/dev/null | cut -f 2- -d ' ')}")
+  commandNr=${commandNr:--1}
+  echo ${hgrepOutput[${commandNr}]}
+  xclip -i <<< ${hgrepOutput[${commandNr}]}
+}
+
+# main local history function:
+# - only write history if current directory belongs to me
+# - only write history if useHistory filter says "1"
+# - add timestamp and historyline
+doNotLogCommands='^ls( |$)|^ll( |$)|^cd( |$)|^z( |$)|^hgrep( |$)|^hdgrep( |$)|^hks( |$)|^bg( |$)|^fg( |$)|^less( |$)|^kspwd( |$)'
+function myLocalHistory()
+{
+  if [[ -O $PWD && -w $PWD ]] ; then
+    HISTORYLINE="$@"
+    if ! [[ $HISTORYLINE =~ $doNotLogCommands ]] ; then
+      (date +%F.%H-%M-%S | tr -d '\n' ; print -r " $HISTORYLINE") >>.history
+    fi
+  fi
+}
+
+function mkcdir()
+{
+    mkdir $1
+    cd $1
+}
+
+autoload -U url-quote-magic
+zle -N self-insert url-quote-magic
+
+zmodload zsh/mathfunc
+
+FORTUNE=/usr/games/fortune
+[[ -x $FORTUNE ]] && (echo; $FORTUNE)
+
+if [[ -e /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    typeset -A ZSH_HIGHLIGHT_STYLES
+    ZSH_HIGHLIGHT_STYLES[default]='none'
+    ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=red,bold'
+    ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=yellow'
+    ZSH_HIGHLIGHT_STYLES[alias]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[builtin]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[function]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[command]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[precommand]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[commandseparator]='none'
+    ZSH_HIGHLIGHT_STYLES[hashed-command]='fg=green'
+    ZSH_HIGHLIGHT_STYLES[path]='none'
+    ZSH_HIGHLIGHT_STYLES[path_prefix]='none'
+    ZSH_HIGHLIGHT_STYLES[globbing]='fg=blue'
+    ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue'
+    ZSH_HIGHLIGHT_STYLES[single-hyphen-option]='none'
+    ZSH_HIGHLIGHT_STYLES[double-hyphen-option]='none'
+    ZSH_HIGHLIGHT_STYLES[back-quoted-argument]='none'
+    ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=yellow'
+    ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=yellow'
+    ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=yellow'
+    ZSH_HIGHLIGHT_STYLES[dollar-double-quoted-argument]='fg=cyan'
+    ZSH_HIGHLIGHT_STYLES[back-double-quoted-argument]='fg=cyan'
+    ZSH_HIGHLIGHT_STYLES[back-dollar-quoted-argument]='fg=cyan'
+    ZSH_HIGHLIGHT_STYLES[assign]='none'
+    ZSH_HIGHLIGHT_STYLES[redirection]='none'
+    ZSH_HIGHLIGHT_STYLES[comment]='fg=yellow,bold'
+fi
