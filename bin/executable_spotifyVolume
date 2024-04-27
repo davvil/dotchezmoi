@@ -1,0 +1,24 @@
+#!/bin/bash
+
+INC=0.03
+direction=${1:?You have to specify the volume direction}
+
+currentVol=$(
+  dbus-send \
+    --print-reply \
+    --session \
+    --dest=org.mpris.MediaPlayer2.spotify \
+    /org/mpris/MediaPlayer2 \
+    org.freedesktop.DBus.Properties.Get \
+    string:org.mpris.MediaPlayer2.Player \
+    string:Volume \
+  | awk '/variant/ {print $NF}'
+)
+
+if [[ $direction == "up" ]]; then
+  newVol=$(echo "$currentVol" + "$INC" | bc)
+else
+  newVol=$(echo "$currentVol" - "$INC" | bc)
+fi
+
+dbus-send --print-reply --session --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Set string:org.mpris.MediaPlayer2.Player string:Volume variant:double:"$newVol"

@@ -1,0 +1,24 @@
+default partial alphanumeric_keys
+xkb_symbols "basic" {
+	include "us"
+    include "level3(ralt_switch)"
+	name[Group1] = "English (US, dvt changes)";
+    key <CAPS> { [ Escape ] };
+    key <AE01> { [ 1, excal, exclamdown, degree ] };
+    key <AE02> { [ 2, at, twosuperior ] };
+    key <AE10> { [ 0, parenright, degree ] };
+    key <AE12> { [ equal, plus, masculine, ordfeminine ] };
+	key <AD03> { [ e, E, EuroSign, cent ] };
+	key <AD07> { [ u, U, udiaeresis, Udiaeresis ] };
+	key <AD09> { [ o, O, odiaeresis, Odiaeresis ] };
+	key <AC01> { [ a, A, adiaeresis, Adiaeresis ] };
+	key <AC02> { [ s, S, ssharp ] };
+    key <AC11> { [ dead_acute, quotedbl, apostrophe ] };
+    key <TLDE> { [ grave, asciitilde, dead_grave, ordfeminine ] };
+    key <AB03> { [ c, C, cacute, Cacute ] };
+    key <AB04> { [ v, V, dead_caron ] };
+    key <AB06> { [ n, N, ntilde, Ntilde ] };
+    key <AB10> { [ slash, question, questiondown ] };
+    key <MENU> { [ F13 ] };
+    key <PRSC> { [ F13 ] };
+};

@@ -1,0 +1,236 @@
+# "Hardware configuration"
+input "type:keyboard" {
+  xkb_layout us-dvt
+  xkb_numlock enabled
+}
+input "type:touchpad" tap enabled
+input "6134:2309:Unicomp__Endura_Pro_Keyboard__Mouse" {
+  middle_emulation enabled
+  scroll_method on_button_down
+  scroll_button button3
+}
+
+{{ .data.sway.monitors }}
+
+{{ .data.sway.wallpaper }}
+
+{{ .data.sway.swayidle }}
+
+for_window [class="Google-chrome"] inhibit_idle fullscreen
+
+set $mod Mod4
+set $scriptdir ~/.config/sway
+set $term kitty
+
+mouse_warping container
+
+# Font for window titles. Will also be used by the bar unless a different font
+# is used in the bar {} block below.
+#font pango:monospace 8
+font pango:Verdana Bold 10
+
+default_border pixel 6
+gaps inner 15
+show_marks no
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+floating_minimum_size 5 x 5
+
+focus_on_window_activation none
+
+# start a terminal
+bindsym $mod+x exec $term
+
+# kill focused window
+bindsym $mod+q kill
+
+bindsym $mod+r exec $scriptdir/rofiRun.sh
+
+# change focus
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Left  focus left
+bindsym $mod+Down  focus down
+bindsym $mod+Up    focus up
+bindsym $mod+Right focus right
+
+# move focused window
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+# alternatively, you can use the cursor keys:
+bindsym $mod+Shift+Left  move left
+bindsym $mod+Shift+Down  move down
+bindsym $mod+Shift+Up    move up
+bindsym $mod+Shift+Right move right
+
+# split in vertical/horizontal orientation
+bindsym $mod+v split toggle
+
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
+# change container layout (stacked, tabbed, toggle split)
+#bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+t split v, layout tabbed
+
+# toggle tiling / floating
+bindsym $mod+Shift+space floating toggle
+
+# gaps (s for "single window")
+bindsym $mod+shift+s exec $scriptdir/singleWindowGaps.sh
+
+# change focus between tiling / floating windows
+bindsym $mod+space focus mode_toggle
+
+# focus the parent container
+bindsym $mod+a focus parent
+
+# focus the child container
+#~ bindsym $mod+d focus child
+
+# switch to workspace
+bindsym F13 exec --no-startup-id $scriptdir/wsManagement.sh goto
+bindsym $mod+F13 exec --no-startup-id $scriptdir/wsManagement.sh create
+bindsym Shift+F13 exec --no-startup-id $scriptdir/wsManagement.sh move
+bindsym Shift+$mod+F13 exec --no-startup-id $scriptdir/wsManagement.sh moveNew
+bindsym Control+F13 exec --no-startup-id kill -s USR1 `cat ~/.config/i3/wsBackAndForth.pid`
+bindsym $mod+Backspace exec --no-startup-id kill -s USR1 `cat ~/.config/i3/wsBackAndForth.pid`
+bindsym $mod+grave exec --no-startup-id kill -s USR1 `cat ~/.config/i3/wsBackAndForth.pid`
+bindsym $mod+o exec $swaycriptdir/switchWorkspaces.py
+bindsym $mod+i exec $scriptdir/focusNextOutput.py
+bindsym $mod+Escape exec --no-startup-id $scriptdir/focusMail.sh
+
+# Window jumping with tags (handled automatically via external script)
+bindsym $mod+1 [con_mark="^1$"] focus
+bindsym $mod+2 [con_mark="^2$"] focus
+bindsym $mod+3 [con_mark="^3$"] focus
+bindsym $mod+4 [con_mark="^4$"] focus
+bindsym $mod+5 [con_mark="^5$"] focus
+bindsym $mod+6 [con_mark="^6$"] focus
+bindsym $mod+7 [con_mark="^7$"] focus
+bindsym $mod+8 [con_mark="^8$"] focus
+bindsym $mod+9 [con_mark="^9$"] focus
+
+# "Master window"
+bindsym $mod+Return exec --no-startup-id $swaycriptdir/master.py
+bindsym $mod+0 exec --no-startup-id $swaycriptdir/master.py -f
+
+bindsym $mod+Tab exec --no-startup-id kill -s USR1 `cat ~/.config/i3/alttab.pid`
+# Window list menu
+bindsym Shift+$mod+Tab exec --no-startup-id rofi -show window -window-format "{t} {w} {c}" -show-icons
+
+# reload the configuration file
+bindsym $mod+Control+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Control+r restart
+
+# exit i3 (logs you out of your X session)
+bindsym $mod+Control+q exit
+
+for_window [class="Spotify"] floating enable, move scratchpad, scratchpad show, move position center, resize set 75ppt 75ppt
+bindsym $mod+backslash [class="Spotify"] scratchpad show, resize set 75ppt 75ppt, move position center
+
+for_window [title="^pdfpc - present"] border none floating enable
+
+for_window [class="[Cc]innamon-settings"] floating enable
+for_window [class="[Bb]lueman-manager"] floating enable
+
+for_window [title="meet.google.com is sharing a window."] floating enable
+for_window [title="Google Meet"] move to workspace Meet
+
+for_window [class="JugglingLab"] floating enable
+
+
+# resize window (you can also use the mouse for that)
+mode "resize" {
+        # These bindings trigger as soon as you enter the resize mode
+
+        # Pressing left will shrink the window’s width.
+        # Pressing right will grow the window’s width.
+        # Pressing up will shrink the window’s height.
+        # Pressing down will grow the window’s height.
+        bindsym h resize shrink width 10 px or 10 ppt
+        bindsym k resize grow height 10 px or 10 ppt
+        bindsym j resize shrink height 10 px or 10 ppt
+        bindsym l resize grow width 10 px or 10 ppt
+
+        # same bindings, but for the arrow keys
+        bindsym Left resize shrink width 10 px or 10 ppt
+        bindsym Up resize grow height 10 px or 10 ppt
+        bindsym Down resize shrink height 10 px or 10 ppt
+        bindsym Right resize grow width 10 px or 10 ppt
+
+        # back to normal: Enter or Escape
+        bindsym Return exec i3barProgNotify --stop resize, mode "default"
+        bindsym Escape exec i3barProgNotify --stop resize, mode "default"
+}
+# Disable mouse resize
+bindsym --border button1 nop
+bindsym $mod+Shift+r exec ~/bin/i3barProgNotify -c '#ff0000' --start resize -i , mode "resize"
+bindsym $mod+equal resize grow width 10 px or 10 ppt
+bindsym $mod+minus resize shrink width 10 px or 10 ppt
+
+# Music
+bindsym $mod+F9  exec --no-startup-id playerctl play-pause
+bindsym $mod+XF86Messenger  exec --no-startup-id playerctl play-pause
+bindsym $mod+F11 exec --no-startup-id playerctl previous
+bindsym $mod+Cancel exec --no-startup-id playerctl previous
+bindsym $mod+F12 exec --no-startup-id playerctl next
+bindsym $mod+XF86Favorites exec --no-startup-id playerctl next
+
+# Pulse Audio controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym shift+XF86AudioRaiseVolume exec $HOME/bin/spotifyVolume up
+bindsym shift+XF86AudioLowerVolume exec $HOME/bin/spotifyVolume down
+
+# Other special keys
+bindsym XF86Messenger exec ~/bin/prtscr
+
+# Start i3bar to display a workspace bar (plus the system information i3status
+# finds out, if available)
+bar {
+   swaybar_command waybar
+}
+
+for_window [class="XEyes"] floating enable, border none, sticky enable
+no_focus [class="XEyes"]
+
+# class                 border    backgr.   text    indicator child_border
+client.focused          #00cc0088 #00cc0088 #fdf6e3 #ccffcc88 #00cc0088
+client.focused_inactive #00559988 #00559988 #aaaaaa #002b36 #00559988
+client.unfocused        #00559988 #00559988 #aaaaaa #002b36 #00559988
+#~ client.unfocused          #00550088 #00550088 #fdf6e3 #ccffcc88 #00550088
+client.urgent           #dc322f   #dc322f   #fdf6e3 #dc322f
+
+
+# Startup commands
+exec_always gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita'
+exec_always gsettings set org.gnome.desktop.interface icon-theme 'ubuntu-mono-dark-gnome-wise'
+exec $scriptdir/autotag.py
+exec $scriptdir/alttab.py
+exec $scriptdir/wsBackAndForth.py
+exec $scriptdir/inhibit_idle.py
+#~ exec rm -f /tmp/wobpipe && mkfifo /tmp/wobpipe && tail -f /tmp/wobpipe | wob
+exec nm-applet --indicator
+exec --no-startup-id blueman-applet
+exec --no-startup-id mako
+
+include /etc/sway/config.d/*
+
+include swayfx.config
+
+{{ .data.sway.local_settings }}
+
+{{ .data.dont_exist }}
