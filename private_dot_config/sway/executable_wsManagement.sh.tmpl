@@ -6,7 +6,7 @@ source rofiMonitor.sh
 
 monitor=`get_monitor`
 
-ROFI=$HOME/rofi/bin/rofi
+ROFI={{ .sway.rofi }}
 
 case $1 in
   goto)
