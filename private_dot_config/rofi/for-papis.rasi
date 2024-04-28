@@ -1,0 +1,9 @@
+@theme "rounded-nord-dark.rasi"
+
+* {
+  font: "Trebuchet MS 14";
+}
+
+listview { lines: 10; }
+
+window { width: 70%; }

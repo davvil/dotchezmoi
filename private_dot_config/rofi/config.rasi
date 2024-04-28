@@ -1,0 +1,9 @@
+configuration {
+  /* font: "Trebuchet MS 28"; */
+  font: "IntoneMono Nerd Font 28";
+}
+
+/* @theme "solarized_alternate-dvt.rasi" */
+@theme "rounded-nord-dark.rasi"
+
+element-icon { size: 1.65ch; }
