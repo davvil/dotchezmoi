@@ -211,7 +211,7 @@ zle -N self-insert url-quote-magic
 
 zmodload zsh/mathfunc
 
-FORTUNE=/usr/games/fortune
+FORTUNE={{ .zshrc.fortune }}
 [[ -x $FORTUNE ]] && (echo; $FORTUNE)
 
 if [[ -e /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
